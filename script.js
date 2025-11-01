@@ -9,7 +9,7 @@ document.onkeydown = function(e) {
   }
 }
 
-getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+document.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
 
 // Responsive navigation and smooth scrolling
