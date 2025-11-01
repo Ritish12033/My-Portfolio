@@ -1,6 +1,7 @@
-// Responsive navigation and smooth scrolling
+//prevent right clicking
 document.addEventListener("contextmenu", e => e.preventDefault(), false);
 
+// Responsive navigation and smooth scrolling
 document.addEventListener('DOMContentLoaded', () => {
   // Mobile menu toggle
   const menuToggle = document.getElementById('mobile-menu');
