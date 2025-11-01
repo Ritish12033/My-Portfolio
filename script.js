@@ -9,8 +9,6 @@ document.onkeydown = function(e) {
   }
 }
 
-document.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-
 
 // Responsive navigation and smooth scrolling
 document.addEventListener('DOMContentLoaded', () => {
