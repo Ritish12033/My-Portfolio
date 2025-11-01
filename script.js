@@ -1,4 +1,5 @@
 // Responsive navigation and smooth scrolling
+document.addEventListener("contextmenu", e => e.preventDefault(), false);
 
 document.addEventListener('DOMContentLoaded', () => {
   // Mobile menu toggle
