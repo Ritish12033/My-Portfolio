@@ -1,5 +1,5 @@
-//prevent right clicking
-document.addEventListener("contextmenu", e => e.preventDefault(), false);
+//prevent right click and some hotkeys
+document.addEventListener('contextmenu', event => event.preventDefault());
 
 document.onkeydown = function(e) {
   if (e.keyCode == 123 || // F12
@@ -9,16 +9,17 @@ document.onkeydown = function(e) {
   }
 }
 
-
 // Responsive navigation and smooth scrolling
 document.addEventListener('DOMContentLoaded', () => {
   // Mobile menu toggle
   const menuToggle = document.getElementById('mobile-menu');
   const navLinks = document.querySelector('.nav-links');
-  menuToggle.addEventListener('click', function() {
-    navLinks.classList.toggle('active');
-    menuToggle.classList.toggle('active');
-  });
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', function() {
+      navLinks.classList.toggle('active');
+      menuToggle.classList.toggle('active');
+    });
+  }
 
   // Smooth scroll for nav links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -29,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         target.scrollIntoView({ behavior: 'smooth' });
       }
       // Close mobile menu after click
-      navLinks.classList.remove('active');
-      menuToggle.classList.remove('active');
+      if (navLinks) navLinks.classList.remove('active');
+      if (menuToggle) menuToggle.classList.remove('active');
     });
   });
 
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!viewport) return;
 
   const track = document.querySelector('.slider-track');
-  const slides = Array.from(track.querySelectorAll('.slide'));
+  const slides = Array.from(track ? track.querySelectorAll('.slide') : []);
   const prevBtn = document.querySelector('.slider-btn.prev');
   const nextBtn = document.querySelector('.slider-btn.next');
 
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const show = slidesToShow();
     const slideWidth = viewport.clientWidth / show;
     const translateX = -index * slideWidth;
-    track.style.transform = `translateX(${translateX}px)`;
+    if (track) track.style.transform = `translateX(${translateX}px)`;
   }
 
   function goTo(i) {
@@ -83,8 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePosition();
   }
 
-  nextBtn.addEventListener('click', () => goTo(index + 1));
-  prevBtn.addEventListener('click', () => goTo(index - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
+  if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
 
   // Autoplay
   function startAutoplay() {
@@ -97,19 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Touch / drag support
   viewport.addEventListener('pointerdown', (e) => {
+    if (!track) return;
     isDragging = true;
     startX = e.clientX;
-    currentTranslate = parseFloat(track.style.transform.replace('translateX(', '').replace('px)', '')) || 0;
+    const style = track.style.transform || '';
+    currentTranslate = parseFloat(style.replace('translateX(', '').replace('px)', '')) || 0;
     viewport.setPointerCapture(e.pointerId);
     stopAutoplay();
   });
   viewport.addEventListener('pointermove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || !track) return;
     const delta = e.clientX - startX;
     track.style.transform = `translateX(${currentTranslate + delta}px)`;
   });
   viewport.addEventListener('pointerup', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || !track) return;
     isDragging = false;
     const delta = e.clientX - startX;
     const show = slidesToShow();
@@ -194,30 +197,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Drawer menu functionality
-
 document.addEventListener('DOMContentLoaded', function(){
-  // Simple menu toggle .
-
   const menuButton = document.getElementById('menuButton');
   const menuDrawer = document.getElementById('menuDrawer');
   const menuOverlay = document.getElementById('menuOverlay');
   const drawerClose = document.getElementById('drawerClose');
 
+  // If essential elements are missing, skip drawer setup
+  if (!menuButton || !menuDrawer) return;
+
+  // collect in-drawer links (safe fallback)
+  const links = Array.from(menuDrawer.querySelectorAll('.drawer-link, a[href^="#"]'));
+
   function openMenu() {
     menuButton.classList.add('open');
     menuButton.setAttribute('aria-expanded', 'true');
     menuDrawer.setAttribute('aria-hidden', 'false');
-    menuDrawer.style.display = 'block'; // Show the menu immediately
-    const firstLink = menuDrawer.querySelector('.drawer-link, #drawer-name');
+    menuDrawer.style.display = 'block';
+    const firstLink = menuDrawer.querySelector('.drawer-link, #drawer-name, a[href^="#"]');
     if (firstLink) firstLink.focus();
     menuDrawer.classList.add('open');
+    if (menuOverlay) menuOverlay.style.display = 'block';
   }
 
   function closeMenu() {
     menuButton.classList.remove('open');
     menuButton.setAttribute('aria-expanded', 'false');
     menuDrawer.setAttribute('aria-hidden', 'true');
-    menuDrawer.style.display = 'none'; // Hide the menu immediately
+    menuDrawer.style.display = 'none';
+    menuDrawer.classList.remove('open');
+    if (menuOverlay) menuOverlay.style.display = 'none';
     menuButton.focus();
   }
 
@@ -226,8 +235,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if (isOpen) closeMenu(); else openMenu();
   });
 
-  menuOverlay.addEventListener('click', closeMenu);
-  drawerClose.addEventListener('click', closeMenu);
+  if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+  if (drawerClose) drawerClose.addEventListener('click', closeMenu);
 
   // close on Escape
   document.addEventListener('keydown', (e) => {
@@ -235,27 +244,27 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   // smooth scroll for drawer links + close after click
-  links.forEach(link=>{
-    link.addEventListener('click', function(e){
-      const href = this.getAttribute('href');
-      if(href && href.startsWith('#')){
-        e.preventDefault();
-        closeMenu();
-        const el = document.querySelector(href);
-        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-      }
+  if (links && links.length) {
+    links.forEach(link=>{
+      link.addEventListener('click', function(e){
+        const href = this.getAttribute('href');
+        if(href && href.startsWith('#')){
+          e.preventDefault();
+          closeMenu();
+          const el = document.querySelector(href);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
     });
-  });
+  }
 
   // contact form inside drawer - basic demonstration handler
   const contactForm = document.getElementById('drawerContactForm');
   if(contactForm){
     contactForm.addEventListener('submit', function(e){
       e.preventDefault();
-      // simple in-place demo: you can wire to your backend here
       const fd = new FormData(contactForm);
       const name = fd.get('name');
-      // Show a minimal feedback then reset
       alert('Thanks, ' + (name || 'there') + '! Message sent (demo).');
       contactForm.reset();
       closeMenu();
